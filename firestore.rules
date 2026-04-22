@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // User Validation
+    function isValidUser(data) {
+      return data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100
+          && data.email is string && data.email.size() <= 200
+          && (data.get('photoURL', '') is string)
+          && (data.get('bio', '') is string && data.get('bio', '').size() <= 500)
+          && data.createdAt == request.time;
+    }
+
+    match /users/{userId} {
+      // PII Isolation: Only owner can read their own profile (which contains email)
+      allow get: if isOwner(userId);
+      allow list: if false; 
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio'])
+        && incoming().displayName is string && incoming().displayName.size() > 0
+      );
+    }
+
+    // Room Validation
+    function isValidRoom(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100
+          && data.creatorId == request.auth.uid
+          && data.creatorName is string && data.creatorName.size() > 0
+          && data.createdAt == request.time
+          && data.status in ['active', 'ended']
+          && data.tags is list && data.tags.size() <= 10
+          && (data.tags.size() == 0 || data.tags[0] is string)
+          && data.get('participantCount', 0) is number;
+    }
+
+    match /rooms/{roomId} {
+      // Allow public listing of active rooms for the Global Lobby
+      allow list: if resource.data.status == 'active';
+      allow get: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(roomId) && isValidRoom(incoming());
+      allow update: if isSignedIn() && (
+        // Creator can update basic info
+        (isRoomCreator(roomId) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'tags', 'status'])) ||
+        // System updates (participant increments - simplified for demo)
+        (incoming().diff(existing()).affectedKeys().hasOnly(['participantCount']))
+      );
+      allow delete: if isRoomCreator(roomId);
+    }
+
+    function isRoomCreator(roomId) {
+      return isSignedIn() && get(/databases/$(database)/documents/rooms/$(roomId)).data.creatorId == request.auth.uid;
+    }
+
+    match /rooms/{roomId}/participants/{participantId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(incoming().userId);
+      allow delete: if isOwner(existing().userId) || isRoomCreator(roomId);
+    }
+
+    // Message Validation
+    function isValidMessage(data) {
+      return data.text is string && data.text.size() > 0 && data.text.size() <= 1000
+          && data.userId == request.auth.uid
+          && data.userName is string && data.userName.size() > 0
+          && data.createdAt == request.time;
+    }
+
+    match /rooms/{roomId}/messages/{messageId} {
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidMessage(incoming());
+      allow delete: if isRoomCreator(roomId); // Only creator can delete messages
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a founder/entrepreneur in the community.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "description": "Full name or username" },
+        "photoURL": { "type": "string", "description": "URL to profile picture" },
+        "bio": { "type": "string", "description": "Short entrepreneur bio" },
+        "email": { "type": "string", "format": "email" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "createdAt"]
+    },
+    "Room": {
+      "title": "Room",
+      "description": "A real-time drop-in audio/text room.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Title of the room" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Topic tags like AI, SaaS, etc." },
+        "creatorId": { "type": "string", "description": "UID of the founder who created the room" },
+        "creatorName": { "type": "string", "description": "Cache of creator's name" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "ended"], "description": "Whether the room is currently live" },
+        "participantCount": { "type": "number", "description": "Current number of people in the room" }
+      },
+      "required": ["name", "creatorId", "createdAt", "status"]
+    },
+    "Participant": {
+      "title": "Participant",
+      "description": "Presence of a user in a room.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "joinedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A chat message within a room.",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "The message content" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["text", "userId", "userName", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Public and private user profiles."
+    },
+    "/rooms/{roomId}": {
+      "schema": "Room",
+      "description": "Live drop-in rooms."
+    },
+    "/rooms/{roomId}/participants/{participantId}": {
+      "schema": "Participant",
+      "description": "Users currently in a specific room."
+    },
+    "/rooms/{roomId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat messages in a specific room."
+    }
+  }
+}

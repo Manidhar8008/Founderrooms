@@ -1,0 +1,6 @@
+{
+  "name": "FounderRooms",
+  "description": "A real-time drop-in audio and text community for tech entrepreneurs to share frictionless knowledge.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}
