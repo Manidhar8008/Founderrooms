@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# FounderRooms 🚀
 
-# Run and deploy your AI Studio app
+**Frictionless Voice & Knowledge Rooms for Founders.**
 
-This contains everything you need to run your app locally.
+FounderRooms is a high-signal, drop-in audio space designed for technical and non-technical founders, solopreneurs, and digital transformation leaders. It bridges the gap between fleeting ad-hoc audio rooms and compounding community knowledge through an autonomous AI-driven transcription and execution layer.
 
-View your app in AI Studio: https://ai.studio/apps/0fa73505-97b1-4119-84ed-582fc382b116
+## Core Features
+* **Zero-Friction Audio:** Drop-in WebRTC voice rooms powered by Agora. No scheduling, no links—just click and talk.
+* **Live AI Transcriber:** Native browser-based continuous speech-to-text integration captures high-level technical discussions in real-time.
+* **The Execution Engine:** Convert room transcripts into actionable, highly formatted "Founder Execution Roadmaps" using the `/ai finalize` command.
+* **Premium Aesthetic:** A futuristic, minimalist UI built with glass-morphism, deep navy gradients, and high-impact neon cyan accents.
 
-## Run Locally
+## Tech Stack
+* **Frontend:** React (Vite), Tailwind CSS, Shadcn UI
+* **Backend & Auth:** Firebase (Authentication & Firestore Real-time Database)
+* **Real-time Audio:** Agora WebRTC SDK
+* **Hosting:** Vercel CI/CD Pipeline
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Local Setup
+1. Clone the repository: `git clone https://github.com/yourusername/founderrooms.git`
+2. Install dependencies: `npm install`
+3. Create a `.env.local` file in the root directory and add your keys:
+   ```env
+   VITE_AGORA_APP_ID=your_agora_key
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_sender_id
+   VITE_FIREBASE_APP_ID=your_firebase_app_id
